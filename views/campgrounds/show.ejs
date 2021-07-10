@@ -1,0 +1,121 @@
+<% layout('layouts/boilerplate') %>
+    <link rel="stylesheet" href="/staticSheets/star.css">
+
+    <div id='map' style='width: 1300px; height: 400px;' class="mb-5 ms-0"></div>
+    <div class="row">
+        <div class="col-6 ">
+            <div class="card container px-0 mb-5 mx-5" style="width: 32rem;">
+                <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <% found.images.forEach((img, i)=> { %>
+                            <div class="carousel-item <%= i === 0 ? 'active' : ''%>">
+                                <img src="<%= img.url%>" class="d-block w-100" alt="">
+                            </div>
+                            <% }) %>
+                    </div>
+                    <% if(found.images.length> 1) {%>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        <% } %>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title ">
+                        <%=found.title%>
+                    </h5>
+                    <p class="card-text">
+                        <%=found.description%>
+                    </p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item text-muted">
+                        <%=found.location%>
+                    </li>
+                    <li class="list-group-item text-muted">submitted by <b>
+                            <%=found.author.username%>
+                        </b> </li>
+                    <li class="list-group-item">$<%=found.price%>/night</li>
+                </ul>
+                <% if(currentUser&&found.author.equals(currentUser._id)){ %>
+                    <div class="px-3 card-body">
+                        <a href="/campgrounds/<%=found._id%>/edit" class="card-link btn btn-info"
+                            style='color:aliceblue'>Edit</a>
+                        <form class='d-inline' action="/campgrounds/<%=found._id%>?_method=DELETE" method="POST">
+                            <button class="btn btn-danger card-link ">Delete</button>
+                        </form>
+                    </div>
+                    <% } %>
+                        <div class="card-body mt-0">
+                            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                        </div>
+            </div>
+        </div>
+        <% if(currentUser){ %>
+            <div class="col-6">
+                <h2>Leave a Comment</h2>
+                <form action="/campgrounds/<%=found._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
+                    <div class="mt-3">
+                        <fieldset class="starability-grow">
+                            <input type="radio" id="no-rate" class="input-no-rate" name="rating" value="0" checked
+                                aria-label="No rating." />
+                            <input type="radio" id="first-rate1" name="rating" value="1" />
+                            <label for="first-rate1" title="Terrible">1 star</label>
+                            <input type="radio" id="first-rate2" name="rating" value="2" />
+                            <label for="first-rate2" title="Not good">2 stars</label>
+                            <input type="radio" id="first-rate3" name="rating" value="3" />
+                            <label for="first-rate3" title="Average">3 stars</label>
+                            <input type="radio" id="first-rate4" name="rating" value="4" />
+                            <label for="first-rate4" title="Very good">4 stars</label>
+                            <input type="radio" id="first-rate5" name="rating" value="5" />
+                            <label for="first-rate5" title="Amazing">5 stars</label>
+                        </fieldset>
+                    </div>
+                    <div class="mb-3">
+                        <label for="body" class="form-label">Review</label>
+                        <textarea type="text" id="body" cols="30" rows="3" class="form-control" name="body"></textarea>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <button class="btn btn-success">Submit</button>
+                </form>
+                <% for(let review of found.reviews) { %>
+                    <div class="card mb-3 ">
+                        <div class="card-body">
+                            <p class="starability-result" data-rating=<%=review.rating%> ></p>
+                            <h6 class="card-subtitle mb-2 text-muted">By <%= review.author.username%>
+                            </h6>
+                            <p class="card-text">Review: <%= review.body %>
+                            </p>
+                            <% if( currentUser && review.author.equals(currentUser._id)) {%>
+                                <form action="/campgrounds/<%=found._id%>/reviews/<%=review._id%>?_method=DELETE"
+                                    method="POST">
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                                <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+            </div>
+            <% }else{ %>
+                <div class="col-6">
+                    <h2>Log In or Sign Up to view Comments.</h2>
+                </div>
+                <%}%>
+    </div>
+
+
+
+    <script>
+        const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
+        const found = <%- JSON.stringify(found) %>;
+    </script>
+
+    <script src="/javascripts/mapScripts.js"></script>
